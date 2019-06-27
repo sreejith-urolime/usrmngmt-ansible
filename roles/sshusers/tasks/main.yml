@@ -1,0 +1,65 @@
+---
+  - name: create user account
+    user:
+      name: "{{ item.name }}"
+      state: present
+      shell: /bin/bash
+      append: yes
+    groups: "{{ item.group }}"
+    with_items:
+     - "{{ users }}"
+  
+  - name: "Add authorized keys"
+    authorized_key:
+      user: "{{ item.name }}"
+      key: "{{ lookup('file', 'files/'+ \"{{item.name}}\" + '.key.pub') }}"
+    with_items: "{{ users }}"
+
+  - name: "sudo without password"
+    lineinfile:
+      dest: "/etc/sudoers"
+      state: "present"
+      regexp: "^%admin"
+      line: "%admin ALL=(ALL) NOPASSWD: ALL"
+      backup: yes
+    notify:
+    - restart_sshd
+    - restart_ssh
+
+  - name: "Disable Root Login"
+    lineinfile:
+      dest: /etc/ssh/sshd_config
+      regexp: '^PermitRootLogin'
+      line: "PermitRootLogin no"
+      state: present
+      backup:  yes
+    notify:
+    - restart_sshd
+    - restart_ssh
+
+  - name: "Disable PasswordAuthentication"
+    lineinfile:
+      dest: /etc/ssh/sshd_config
+      regexp: "^PasswordAuthentication'"
+      line: "PasswordAuthentication no"
+      state: present
+      backup: yes
+    notify:
+    - restart_sshd
+    - restart_ssh
+
+  - name: "delete user account"
+    user: 
+      name: "{{item.name}}"
+      state: absent
+      remove: yes
+      force: yes
+    with_items: "{{rmusers}}"
+  
+  - name: "delete group account"
+    group: 
+      name: "{item.group}}"
+      state: absent
+      remove: yes
+      force: yes
+    with_items: "{{rmusers}}"

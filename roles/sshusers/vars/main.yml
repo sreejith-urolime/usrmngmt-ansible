@@ -1,0 +1,12 @@
+---
+# vars file for sshusers
+users:
+  - name: urolimepc
+    group: urolimepc
+  - name: sreejith
+    group: sreejith
+
+rmusers:
+  - name: urolimepc
+    group: urolimepc
+   

@@ -1,0 +1,15 @@
+---
+# handlers file for sshusers
+- name: restart_sshd
+  service:
+    name: sshd
+    state: restarted
+    enabled: true
+  when: ansible_distribution == 'RedHat'
+
+- name: restart_ssh
+  service:
+    name: ssh
+    state: restarted
+    enabled: true
+  when: ansible_distribution == 'Debian'
